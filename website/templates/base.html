@@ -36,6 +36,25 @@
       </div>
     </nav>
 
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    <!-- If category of the message is success, i.e. correct format then return this html-->
+    {%if category == 'success' %}
+    <div class="alert alert-success alter-dismissable fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <!-- If category of the message is danger, i.e. incorrect format then return this html-->
+    {%else%}
+    <div class="alert alert-danger alter-dismissable fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {%endif%}{% endfor %}
+
     <div class="container">{% block content %} {% endblock %}</div>
     <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
