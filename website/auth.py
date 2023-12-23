@@ -1,4 +1,8 @@
-from flask import Blueprint, render_template, request,flash
+# routes for authentication
+
+from flask import Blueprint, render_template,request,flash, redirect, url_for
+from .models import User
+from .models import db
 
 # create blueprint for login/signup authentication
 auth = Blueprint("auth",__name__)
@@ -9,7 +13,7 @@ def sign_up():
     # retrive data from post request
     if request.method=='POST':
         email = request.form.get('email')
-        firstname = request.form.get('firstName')
+        username = request.form.get('username')
         password = request.form.get('password')
         
         # flash an error if email or password aren't formatted correctly
@@ -17,12 +21,29 @@ def sign_up():
             flash('Email not formatted correctly!', 'danger')
         elif len(password) < 7:
             flash('Password should be at least 7 characters!', 'danger')
-        elif len(firstname) < 2:
+        elif len(username) < 2:
             flash('First name should be at least 1 character!','danger')
         else:
-            flash('Sser account created!', 'success')
+            # create user with username,email, and password given via request
+            user = User(
+                username=username,
+                email=email,
+                password=password
+            )   
+            # add user to database
+            db.session.add(user)
+            # commit changes
+            db.session.commit()
+            return redirect(url_for('mel'))
+    # if not registering user, just reload page
+    else:
+        return render_template("signup.html")
 
-    return render_template("signup.html")
+@auth.route("/users",)
+def user_list():
+    users = db.session.execute(db.select(User.email)).scalars().all()
+    return render_template("home.html",emails=users)
+
 
 # login route, allows for post and get requests
 @auth.route('/login')
