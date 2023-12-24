@@ -5,9 +5,15 @@ from .models import User
 from .models import db
 from sqlalchemy.exc import IntegrityError
 import bcrypt
+from flask_login import login_user, logout_user, current_user, login_required
+from website import login_manager
+
 
 # create blueprint for login/signup authentication
 auth = Blueprint("auth",__name__)
+
+# configure where unauthenticated user should be redirected if trying to access dashboard
+login_manager.login_view = '/login'
 
 # sign up route, allows for post and get requests
 @auth.route('/sign-up',methods=['POST','GET'])
@@ -55,12 +61,45 @@ def user_list():
     return render_template("home.html",emails=users)
 
 
-# login route, allows for post and get requests
-@auth.route('/login')
-def login():
-    return render_template("login.html")
+@login_manager.user_loader
+def load_user(user_id):
+    # Fetch user object from database via user ID
+    return User.query.get(user_id)
 
-# simple logout route
+
+# login route, allows for post and get requests
+@auth.route('/login', methods=['GET','POST'])
+def login():
+    if request.method == 'POST':
+        # fetch email and password of form input
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        # check if email is in database
+        user = User.query.filter_by(email=email).first() # returns user
+
+        # check if user found and if password matches
+        if user and bcrypt.checkpw(password.encode(),user.password):
+            # login the user and redirect to user dashboard
+            login_user(user)
+            return redirect(url_for('auth.dashboard'))
+        else:
+            flash("Incorrect email or password!")
+            return render_template("login.html")
+    else:
+        # get request, re-render page
+        return render_template("login.html")
+
+# dashboard route for logged in users
+@auth.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
+
+# simple logout route. 
 @auth.route('/logout')
+@login_required # only can access if logged in
 def logout():
-    return render_template("logout.html")
+    logout_user() # logout user with flask_login
+    flash('Successfully logged out.')
+    return redirect(url_for('auth.login')) # redirect to login page

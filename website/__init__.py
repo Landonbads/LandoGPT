@@ -1,11 +1,15 @@
 # imports
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
 # constant for database name
 DB_NAME = 'database.db'
 # declare database name
 db = SQLAlchemy()
+
+# create login manager via flask_login
+login_manager = LoginManager()
 
 # initialize secret key and create flask application
 def create_app():
@@ -16,6 +20,9 @@ def create_app():
 
     # initialize database
     db.init_app(app)
+
+
+    login_manager.init_app(app)
 
     #need to import and register blueprints
     from .views import views
