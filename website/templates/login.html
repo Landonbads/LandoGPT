@@ -1,4 +1,8 @@
-{% extends "base.html" %} {% block title %}login{% endblock %} {% block content
+{% extends "base.html" %} {% block title %}login{% endblock %}
+{% block nav_register_login %}
+<a class="nav-link" href="/sign-up" id="signUp">Sign up</a>
+<a class="nav-link" href="/login" id="login">Login</a>{% endblock %}
+{% block content
 %}
 <form method="POST">
   <br />

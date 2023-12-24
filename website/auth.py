@@ -55,12 +55,6 @@ def sign_up():
 
     return render_template("signup.html")
 
-@auth.route("/users",)
-def user_list():
-    users = db.session.execute(db.select(User.password)).scalars().all()
-    return render_template("home.html",emails=users)
-
-
 @login_manager.user_loader
 def load_user(user_id):
     # Fetch user object from database via user ID
