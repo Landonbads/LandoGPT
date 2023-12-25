@@ -5,7 +5,7 @@ from .models import User
 from .models import db
 from sqlalchemy.exc import IntegrityError
 import bcrypt
-from flask_login import login_user, logout_user, current_user, login_required
+from flask_login import login_user, logout_user, login_required
 from website import login_manager
 
 
@@ -75,7 +75,7 @@ def login():
         # check if user found and if password matches
         if user and bcrypt.checkpw(password.encode(),user.password):
             # login the user and redirect to user dashboard
-            login_user(user)
+            login_user(user,remember=True)
             return redirect(url_for('auth.dashboard'))
         else:
             flash("Incorrect email or password!")

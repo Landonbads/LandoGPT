@@ -1,3 +1,17 @@
-{% extends "base.html"%} {%block title %}Dashboard{% endblock %}
-{% block nav_dashboard %}<a class="nav-link" href="/" id="dashboard">Dashboard </a> {%endblock%}
+{% extends "base.html"%} {% block title %}Dashboard{% endblock %}
+{% block nav_dashboard %}<a class="nav-link" href="/" id="dashboard">Dashboard </a> {% endblock %}
 {% block nav_register_login %}<a class="nav-link" href="/logout" id="logout">Logout</a>{% endblock %}
+{% block content %}
+
+<h1 align="center">GPT Dashboard</h1>
+<div id="responseContainer" class="alert alert-info" style="display: none;">
+    <!-- The response will be displayed here -->
+</div>
+<form method="POST">
+  <textarea name="prompt" id="prompt" class="form-control"></textarea>
+  <br />
+  <div align="center">
+    <button type="submit" class="btn btn-primary">Send Message</button>
+  </div>
+</form>
+ {% endblock %}
