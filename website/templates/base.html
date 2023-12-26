@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <style>
+      .card-scroll {
+      max-height: 30rem;
+      overflow-y: auto;
+      }
+    </style>
     <title>{% block title %}{% endblock %}</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -73,16 +79,15 @@
     ></script>
       {% block javascript %}
       <script>
-        document.getElementById('clearButton').onclick = function() {
+        function clearConversation() {
             // Clear HTML content from the card
-            document.getElementById('cardContent').innerHTML = '';
-        
+            document.getElementById('resposeContent').innerHTML = '';
             // Send a request to the server to clear the Python list
-            fetch('/clear-list', { method: 'POST' })
+            fetch('/delete-conversation', { method: 'POST' })
                 .then(response => response.json())
                 .then(data => console.log(data.message));
-        };
+        }
         </script>
-{% endblock %}
+      {% endblock %}
   </body>
 </html>
