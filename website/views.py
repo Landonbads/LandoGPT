@@ -2,13 +2,30 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import current_user, login_required
 from openai import OpenAI
 import os
-import requests
 import json
 
 views = Blueprint('views',__name__)
 
-client = OpenAI() # create openai client
-headers = {'Authorization': f'Bearer {os.environ.get("OPENAI_API_KEY")}'} # grab api key from .env file
+
+client = OpenAI()
+client.api_key = os.environ.get('OPENAI_API_KEY') # configure OpenAI
+conversation_context = [] # history of questions and answers of chat
+
+def get_response(conversation_context, prompt):
+    messages = [] # messages list to send in openai api post request 
+
+    for question, answer in conversation_context: # loop through previous questions and answers and add the context
+        messages.append({"role": "user", "content": question})
+        messages.append({"role": "assistant", "content": answer})
+    
+    messages.append({"role": "user", "content": prompt}) # append new prompt/question
+
+    response = client.chat.completions.create(
+        model='gpt-4-1106-preview',
+        messages=messages,
+    )
+
+    return response.choices[0].message.content # returns content of response
 
 
 @views.route('/',methods=['POST','GET'])
@@ -25,11 +42,13 @@ def home():
 def dashboard():
     if request.method == 'POST':
         prompt = request.form.get('prompt')
-        data = {
-            "model": "gpt-4-1106-preview",
-            "messages": [{"role": "user", "content": prompt}]
-        }
-        response = requests.post("https://api.openai.com/v1/chat/completions",headers=headers,json=data)
-        if response.status_code==200:
-            print(response.json()['choices'][0]['message']['content']) # print out content of gpt response
+        response = get_response(conversation_context, prompt)
+        conversation_context.append((prompt, response)) # add question and response to context
+
     return render_template("dashboard.html")
+
+@views.route('/delete-conversation',methods=['POST'])
+@login_required
+def delete_conversation():
+    global conversation_context
+    conversation_context = []

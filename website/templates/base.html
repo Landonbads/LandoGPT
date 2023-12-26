@@ -71,5 +71,18 @@
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
     ></script>
+      {% block javascript %}
+      <script>
+        document.getElementById('clearButton').onclick = function() {
+            // Clear HTML content from the card
+            document.getElementById('cardContent').innerHTML = '';
+        
+            // Send a request to the server to clear the Python list
+            fetch('/clear-list', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => console.log(data.message));
+        };
+        </script>
+{% endblock %}
   </body>
 </html>
