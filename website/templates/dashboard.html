@@ -8,18 +8,19 @@
 <div class="card" style="min-height: 30rem;">
   <div id ="resposeContent" class="card-body">
     <div class="card-scroll">
-      Hello
+      {% for message in messages %}
+        <strong>{{message['role']}}:</strong> {{message['content']}} </br> </br>
+      {% endfor %}
     </div>
   </div>
 </div>
 <br/>
-{% block javascript %}{% endblock %}
 <form method="POST">
   <textarea name="prompt" id="prompt" class="form-control" placeholder="Send your message here..."></textarea>
   <br />
   <div align="center">
     <button type="submit" id = 'sendButton' class="btn btn-primary">Send Message</button>
-    <button type="submit" id = 'clearButton' class="btn btn-danger" onclick="clearConversation()">Clear Conversation</button>
+    <button type="submit" name="clear" id = 'clearButton' class="btn btn-danger">Clear Conversation</button>
   </div>
 </form>
 

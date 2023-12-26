@@ -76,19 +76,13 @@ def login():
         if user and bcrypt.checkpw(password.encode(),user.password):
             # login the user and redirect to user dashboard
             login_user(user,remember=True)
-            return redirect(url_for('auth.dashboard'))
+            return redirect(url_for('views.dashboard'))
         else:
             flash("Incorrect email or password!")
             return render_template("login.html")
     else:
         # get request, re-render page
         return render_template("login.html")
-
-# dashboard route for logged in users
-@auth.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template("dashboard.html")
 
 # simple logout route. 
 @auth.route('/logout')
