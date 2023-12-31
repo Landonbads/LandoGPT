@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import current_user, login_required
 from openai import OpenAI
 import os
-import json
+from .models import Credits
 
 views = Blueprint('views',__name__)
 
@@ -53,4 +53,9 @@ def dashboard():
         messages = []
         conversation_context = []
     
-    return render_template("dashboard.html",messages=messages)
+    return render_template("dashboard.html",messages=messages,)
+
+@views.route('/thankyou',methods=['GET'])
+@login_required
+def thankyou():
+    return render_template("thankyou.html")

@@ -4,12 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from dotenv import load_dotenv
 import os
+import stripe
 
 load_dotenv() # load .env variables
 DB_NAME = 'database.db' # constant for database name
 db = SQLAlchemy() # declare database name
-
-
 login_manager = LoginManager() # create login manager via flask_login
 
 def create_app(): # initialize secret key and create flask application
@@ -18,7 +17,8 @@ def create_app(): # initialize secret key and create flask application
     # config for flask app using sqlite.
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///.{DB_NAME}'
     app.config['SECRET_KEY'] = os.environ.get("APP_SECRET_KEY")
-
+    #app.config['STRIPE_PUBLIC_KEY'] = 
+    #app.config['STRIPE_SECRET_KEY'] = 
     db.init_app(app)# initialize database
 
     login_manager.init_app(app)
