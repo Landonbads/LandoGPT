@@ -2,6 +2,7 @@
 
 from flask import Blueprint, render_template,request,flash, redirect, url_for
 from .models import User
+from .models import Credits
 from .models import db
 from sqlalchemy.exc import IntegrityError
 import bcrypt
@@ -42,13 +43,16 @@ def sign_up():
                     email=email,
                     password=hashed_password
                 )  
-                
-                # add user to database
-                db.session.add(user)
-                # commit changes
+                db.session.add(user) # add user to database
                 db.session.commit()
-                # flash a message to notify user of successful account creation
-                flash('Account successfully created!','success')
+                credits = Credits(  # create base credit amount when user signs up ($0)
+                    amount=0.00,
+                    user_id = user.id
+                )
+                db.session.add(credits)
+                db.session.commit()
+                
+                flash('Account successfully created!','success') # flash a message to notify user of successful account creation
             except IntegrityError:
                 flash('Email already signed up!', 'danger')
 
@@ -57,8 +61,7 @@ def sign_up():
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Fetch user object from database via user ID
-    return User.query.get(user_id)
+    return User.query.get(user_id) # Fetch user object from database via user ID
 
 
 # login route, allows for post and get requests
@@ -69,22 +72,19 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        # check if email is in database
-        user = User.query.filter_by(email=email).first() # returns user
+        user = User.query.filter_by(email=email).first() # check if email is in database, returns user
 
         # check if user found and if password matches
         if user and bcrypt.checkpw(password.encode(),user.password):
-            # login the user and redirect to user dashboard
-            login_user(user,remember=True)
+            login_user(user,remember=True) # login the user and redirect to user dashboard
             return redirect(url_for('views.dashboard'))
         else:
             flash("Incorrect email or password!")
             return render_template("login.html")
     else:
-        # get request, re-render page
-        return render_template("login.html")
+        return render_template("login.html") # get request, re-render page
 
-# simple logout route. 
+
 @auth.route('/logout')
 @login_required # only can access if logged in
 def logout():

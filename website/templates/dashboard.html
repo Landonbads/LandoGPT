@@ -1,7 +1,7 @@
 {% extends "base.html"%} {% block title %}Dashboard{% endblock %}
 {% block nav_dashboard %}<a class="nav-link" href="/" id="dashboard">Dashboard </a> {% endblock %}
-{% block nav_buy_credits %} <a class="nav-link" href="/buy-credits" id="buyCredits">Buy Credits</a> {% endblock %}
-{% block nav_credit_balance %} <a class="nav-link" href="/" id="creditBalance">Balance: $0.00 </a> {% endblock %}
+{% block nav_buy_credits %} <a class="nav-link" href="#" id="buyCredits">Buy Credits</a> {% endblock %}
+{% block nav_credit_balance %} <a class="nav-link" href="/" id="creditBalance">Balance: ${{credits}} </a> {% endblock %}
 {% block nav_register_login %}<a class="nav-link" href="/logout" id="logout">Logout</a>{% endblock %}
 {% block content %}
 
@@ -26,4 +26,10 @@
   </div>
 </form>
 
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const checkout_public_key = '{{checkout_public_key}}';
+  const checkout_session_id = '{{checkout_session_id}}';
+</script>
+<script src="{{url_for('static',filename='script.ajax.js') }}"></script>
  {% endblock %}
