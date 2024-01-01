@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, curren
 from flask_login import current_user, login_required
 from openai import OpenAI
 from .models import Credits
+from .models import db
 import stripe
 
 views = Blueprint('views',__name__)
@@ -70,6 +71,7 @@ def stripe_pay():
         mode='payment',
         success_url=url_for('views.thankyou', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
         cancel_url=url_for('views.dashboard', _external=True),
+        metadata={'user_id': current_user.id}
     )
     return {
         'checkout_session_id': session['id'], 
@@ -101,14 +103,21 @@ def stripe_webhook():
     # Handle the checkout.session.completed event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        print(session)
-        line_items = stripe.checkout.Session.list_line_items(session['id'], limit=1)
-        print(line_items['data'][0]['description'])
+        user_id = session['metadata']['user_id']
+        amount_total = session['amount_total']
+        conversion_rate = 100.0  # stripe returns amount in cents, need to convert
+        credits_purchased = amount_total / conversion_rate
+
+        # update user credits
+        user_credits = Credits.query.filter_by(user_id=user_id).first()
+        if user_credits:
+            user_credits.amount += credits_purchased
+        db.session.commit()
 
     return {}
 
 @views.route('/thankyou',methods=['GET'])
 @login_required
 def thankyou():
-    load_credits = Credits.query.filter_by(user_id=current_user.id).first() # load credits from user
+    load_credits = Credits.query.filter_by(user_id=current_user.id).first()
     return render_template("thankyou.html",credits = load_credits.amount)
