@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, request, current_app, flash
 from flask_login import current_user, login_required
 from openai import OpenAI
 from .models import Credits
@@ -12,6 +12,8 @@ conversation_context = [] # history of questions and answers of chat
 messages = []
 
 def get_response(conversation_context, prompt):
+    user_credits = Credits.query.filter_by(user_id=current_user.id).first()
+    TOKEN_COST_PER_1K = .06
     global messages
     client.api_key = current_app.config['OPEN_API_KEY'] # configure OpenAI
     messages = [] # messages list to send in openai api post request 
@@ -26,6 +28,9 @@ def get_response(conversation_context, prompt):
         model='gpt-4-1106-preview',
         messages=messages,
     )
+    token_usage = response.usage.total_tokens # total tokens used, including both prompt and response
+    user_credits.amount -= (token_usage / 1000) * TOKEN_COST_PER_1K # calculate and deduct cost of prompt+response
+    db.session.commit() # commit changes to database
 
     return response.choices[0].message.content # returns content of response
 
@@ -45,12 +50,14 @@ def dashboard():
     global messages
     global conversation_context
     load_credits = Credits.query.filter_by(user_id=current_user.id).first() # load credits from user
-    if request.method == 'POST' and len(request.form) == 1: # check length to make sure it's the send message button
-        prompt = request.form.get('prompt')
-        response = get_response(conversation_context, prompt)
-        messages.append({"role": "assistant", "content": response})
-        conversation_context.append((prompt, response)) # add question and response to context
-    
+    if request.method == 'POST' and len(request.form) == 1: # check if message or clear
+        if load_credits.amount > 0: # check if user has enough credits
+            prompt = request.form.get('prompt')
+            response = get_response(conversation_context, prompt)
+            messages.append({"role": "assistant", "content": response})
+            conversation_context.append((prompt, response)) # add question and response to context
+        else:
+            flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
     elif request.method == 'POST' and len(request.form) > 1: # when clear conversation button is clicked
         messages = []
         conversation_context = []
@@ -111,6 +118,7 @@ def stripe_webhook():
         # update user credits
         user_credits = Credits.query.filter_by(user_id=user_id).first()
         if user_credits:
+            print(user_credits.amount)
             user_credits.amount += credits_purchased
         db.session.commit()
 
