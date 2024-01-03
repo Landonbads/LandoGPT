@@ -1,2 +1,2 @@
 .env
-/instance/.database.db
+.database.db
