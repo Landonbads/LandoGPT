@@ -5,7 +5,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(1000))
     email = db.Column(db.String(1000),unique=True)
-    password = db.Column(db.String(1000))
+    password = db.Column(db.Text)
     credits = db.relationship('Credits')
 
 class Credits(db.Model):
