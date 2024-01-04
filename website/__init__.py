@@ -14,7 +14,7 @@ def create_app(): # initialize secret key and create flask application
 
     app = Flask(__name__)
     # config for flask app using sqlite.
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///.{DB_NAME}'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SECRET_KEY'] = os.environ.get('APP_SECRET_KEY')
     app.config['STRIPE_PUBLIC_KEY'] = os.environ.get('STRIPE_PUBLIC_KEY')
     app.config['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY')
