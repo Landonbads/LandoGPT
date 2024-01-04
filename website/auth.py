@@ -41,7 +41,7 @@ def sign_up():
                 user = User(
                     username=username,
                     email=email,
-                    password=hashed_password
+                    password=hashed_password.decode()
                 )  
                 db.session.add(user) # add user to database
                 db.session.commit()
@@ -75,7 +75,7 @@ def login():
         user = User.query.filter_by(email=email).first() # check if email is in database, returns user
 
         # check if user found and if password matches
-        if user and bcrypt.checkpw(password.encode(),user.password):
+        if user and bcrypt.checkpw(password.encode(),user.password.encode()):
             login_user(user,remember=True) # login the user and redirect to user dashboard
             return redirect(url_for('views.dashboard'))
         else:
