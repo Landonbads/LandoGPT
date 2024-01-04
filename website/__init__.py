@@ -35,5 +35,6 @@ def create_app(): # initialize secret key and create flask application
     return app
 
 def create_database(app):
-    db.create_all()
-    print('Created Database!')
+    with app.app_context():
+        db.create_all()
+        print('Created Database!')
