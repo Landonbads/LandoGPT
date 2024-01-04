@@ -12,5 +12,3 @@ class Credits(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     amount = db.Column(db.Float)
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
-
-# tbd MessageHistory object
