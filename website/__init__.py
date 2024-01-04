@@ -32,14 +32,9 @@ def create_app(): # initialize secret key and create flask application
     app.register_blueprint(views,url_prefix='/')
     app.register_blueprint(auth,url_prefix='/')
 
-    # import User model from models.py
-    from .models import User
-    with app.app_context():
-        db.create_all()
-
     return app
 
 def create_database(app):
-    if not path.exists('website/' + DB_NAME):
-        db.create_all(app=app)
-        print('Created Database!')
+    with app.app_context():
+        db.create_all()
+    print('Created Database!')
