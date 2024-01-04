@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from dotenv import load_dotenv
+from os import path
 import os
 
 load_dotenv() # load .env variables
@@ -37,3 +38,8 @@ def create_app(): # initialize secret key and create flask application
         db.create_all()
 
     return app
+
+def create_database(app):
+    if not path.exists('website/' + DB_NAME):
+        db.create_all(app=app)
+        print('Created Database!')
