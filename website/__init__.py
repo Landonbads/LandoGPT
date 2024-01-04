@@ -20,7 +20,6 @@ def create_app(): # initialize secret key and create flask application
     app.config['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY')
     app.config['OPEN_API_KEY'] = os.environ.get('OPENAI_API_KEY')
     app.config['ENDPOINT_SECRET'] = os.environ.get('ENDPOINT_SECRET')
-    os.environ.get('OPENAI_API_KEY')
     db.init_app(app)# initialize database
 
     login_manager.init_app(app)
