@@ -42,6 +42,8 @@ def sign_up():
                     username=username,
                     email=email,
                     password=hashed_password.decode()
+                    messages=[]
+                    conversation_context=[]
                 )  
                 db.session.add(user) # add user to database
                 db.session.commit()
