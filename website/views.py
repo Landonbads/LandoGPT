@@ -1,32 +1,31 @@
 from flask import Blueprint, render_template, redirect, url_for, request, current_app, flash
 from flask_login import current_user, login_required
 from openai import OpenAI
-from .models import Credits
+from .models import Credits, User
 from .models import db
 import stripe
 
 views = Blueprint('views',__name__)
 
 client = OpenAI()
-conversation_context = [] # history of questions and answers of chat
-messages = []
 
 def get_response(conversation_context, prompt):
-    user_credits = Credits.query.filter_by(user_id=current_user.id).first()
+    user = User.query.get(current_user.id) # fetch current user
+    user_credits = Credits.query.filter_by(user_id=current_user.id).first() # fetch user credits
     TOKEN_COST_PER_1K = .06
-    global messages
     client.api_key = current_app.config['OPEN_API_KEY'] # configure OpenAI
-    messages = [] # messages list to send in openai api post request 
+    
+    user.messages = [] 
 
     for question, answer in conversation_context: # loop through previous questions and answers and add the context
-        messages.append({"role": "user", "content": question})
-        messages.append({"role": "assistant", "content": answer})
+        user.messages.append({"role": "user", "content": question})
+        user.messages.append({"role": "assistant", "content": answer})
     
-    messages.append({"role": "user", "content": prompt}) # append new prompt/question
+    user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
 
     response = client.chat.completions.create(
         model='gpt-4-1106-preview',
-        messages=messages,
+        messages=user.messages,
     )
     token_usage = response.usage.total_tokens # total tokens used, including both prompt and response
     user_credits.amount -= (token_usage / 1000) * TOKEN_COST_PER_1K # calculate and deduct cost of prompt+response
@@ -47,22 +46,21 @@ def home():
 @views.route('/dashboard',methods=['GET','POST'])
 @login_required
 def dashboard():
-    global messages
-    global conversation_context
+    user = User.query.get(current_user.id) # fetch current user
     load_credits = Credits.query.filter_by(user_id=current_user.id).first() # load credits from user
     if request.method == 'POST' and len(request.form) == 1: # check if message or clear
         if load_credits.amount > 0: # check if user has enough credits
             prompt = request.form.get('prompt')
-            response = get_response(conversation_context, prompt)
-            messages.append({"role": "assistant", "content": response})
-            conversation_context.append((prompt, response)) # add question and response to context
+            response = get_response(user.conversation_context, prompt)
+            user.messages.append({"role": "assistant", "content": response})
+            user.conversation_context.append((prompt, response)) # add question and response to context
         else:
             flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
     elif request.method == 'POST' and len(request.form) > 1: # when clear conversation button is clicked
-        messages = []
-        conversation_context = []
+        user.messages = []
+        user.conversation_context = []
     
-    return render_template("dashboard.html",messages=messages,credits=load_credits.amount)
+    return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
 
 
 @views.route('/stripe_pay')
@@ -118,7 +116,6 @@ def stripe_webhook():
         # update user credits
         user_credits = Credits.query.filter_by(user_id=user_id).first()
         if user_credits:
-            print(user_credits.amount)
             user_credits.amount += credits_purchased
         db.session.commit()
 
