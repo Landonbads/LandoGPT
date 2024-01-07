@@ -17,9 +17,9 @@ def get_response(conversation_context, prompt):
     
     user.messages = [] 
 
-    for question, answer in conversation_context: # loop through previous questions and answers and add the context
-        user.messages.append({"role": "user", "content": question})
-        user.messages.append({"role": "assistant", "content": answer})
+    for prompt_and_response in conversation_context: # loop through previous questions and answers and add the context
+        user.messages.append({"role": "user", "content": prompt_and_response["prompt"]})
+        user.messages.append({"role": "assistant", "content": prompt_and_response["response"]})
     
     user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
 
@@ -53,7 +53,7 @@ def dashboard():
             prompt = request.form.get('prompt')
             response = get_response(user.conversation_context, prompt)
             user.messages.append({"role": "assistant", "content": response})
-            user.conversation_context.append((prompt, response)) # add question and response to context
+            user.conversation_context.append({"prompt":prompt, "response":response}) # add question and response to context
         else:
             flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
     elif request.method == 'POST' and len(request.form) > 1: # when clear conversation button is clicked
