@@ -18,11 +18,13 @@ def get_response(conversation_context, prompt):
     user.messages = [] 
 
     for prompt_and_response in conversation_context: # loop through previous questions and answers and add the context
+        print(prompt_and_response["prompt"])
         user.messages.append({"role": "user", "content": prompt_and_response["prompt"]})
         user.messages.append({"role": "assistant", "content": prompt_and_response["response"]})
     
     user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
-    
+    db.session.commit()
+
     response = client.chat.completions.create(
         model='gpt-4-1106-preview',
         messages=user.messages,
