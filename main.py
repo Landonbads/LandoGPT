@@ -6,5 +6,5 @@ app = create_app()
 create_database(app)
 # limits running to only this file
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
     
