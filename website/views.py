@@ -22,7 +22,7 @@ def get_response(conversation_context, prompt):
         user.messages.append({"role": "assistant", "content": prompt_and_response["response"]})
     
     user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
-
+    
     response = client.chat.completions.create(
         model='gpt-4-1106-preview',
         messages=user.messages,
@@ -54,11 +54,13 @@ def dashboard():
             response = get_response(user.conversation_context, prompt)
             user.messages.append({"role": "assistant", "content": response})
             user.conversation_context.append({"prompt":prompt, "response":response}) # add question and response to context
+            db.session.commit()
         else:
             flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
     elif request.method == 'POST' and len(request.form) > 1: # when clear conversation button is clicked
         user.messages = []
         user.conversation_context = []
+        db.session.commit()
     
     return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
 
