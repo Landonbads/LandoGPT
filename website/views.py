@@ -44,22 +44,22 @@ def dashboard():
 
     if request.method == 'POST':
         action = request.form.get('action')
-    if action == 'send_message' and load_credits.amount > 0:
-        prompt = request.form.get('prompt')
-        response = get_response(user.messages, prompt)
-        user.messages.append({"role": "assistant", "content": response})
-        print('test1')
-        print(user.messsages)
-        db.session.commit()
-        print('test2')
-        print(user.messsages)
-    elif action == 'clear_messages':
-        print('test3')
-        print(user.messsages)
-        user.messages = []
-        db.session.commit()
-    else:
-        flash('Not enough credits!', 'danger')
+        if action == 'send_message' and load_credits.amount > 0:
+            prompt = request.form.get('prompt')
+            response = get_response(user.messages, prompt)
+            user.messages.append({"role": "assistant", "content": response})
+            print('test1')
+            print(user.messsages)
+            db.session.commit()
+            print('test2')
+            print(user.messsages)
+        elif action == 'clear_messages':
+            print('test3')
+            print(user.messsages)
+            user.messages = []
+            db.session.commit()
+        else:
+            flash('Not enough credits!', 'danger')
     
     print('test4')
     print(user.messsages)
