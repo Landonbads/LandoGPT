@@ -41,24 +41,28 @@ def home():
 def dashboard():
     user = User.query.get(current_user.id) # fetch current user
     load_credits = Credits.query.filter_by(user_id=current_user.id).first() # load credits from user
-    if request.method == 'POST' and len(request.form) == 1: # check if message or clear
-        if load_credits.amount > 0: # check if user has enough credits
-            prompt = request.form.get('prompt')
-            response = get_response(user.messages, prompt)
-            user.messages.append({"role": "assistant", "content": response})
-            print("test1")
-            print(user.messages)
-        else:
-            flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
-    elif request.method == 'POST' and len(request.form) > 1: # when clear conversation button is clicked
+
+    if request.method == 'POST':
+        action = request.form.get('action')
+    if action == 'send_message' and load_credits.amount > 0:
+        prompt = request.form.get('prompt')
+        response = get_response(user.messages, prompt)
+        user.messages.append({"role": "assistant", "content": response})
+        print('test1')
+        print(user.messsages)
+        db.session.commit()
+        print('test2')
+        print(user.messsages)
+    elif action == 'clear_messages':
+        print('test3')
+        print(user.messsages)
         user.messages = []
-
-    print("test2")
-    print(user.messages)
-    db.session.commit()
-    print("test3")
-    print(user.messages)
-
+        db.session.commit()
+    else:
+        flash('Not enough credits!', 'danger')
+    
+    print('test4')
+    print(user.messsages)
     return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
 
 
