@@ -14,13 +14,7 @@ def get_response(conversation_context, prompt):
     user_credits = Credits.query.filter_by(user_id=current_user.id).first() # fetch user credits
     TOKEN_COST_PER_1K = .06
     client.api_key = current_app.config['OPEN_API_KEY'] # configure OpenAI
-    
-    user.messages = [] 
-
-    for prompt_and_response in conversation_context: # loop through previous questions and answers and add the context
-        user.messages.append({"role": "user", "content": prompt_and_response["prompt"]})
-        user.messages.append({"role": "assistant", "content": prompt_and_response["response"]})
-    
+        
     user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
 
     response = client.chat.completions.create(
@@ -50,24 +44,19 @@ def dashboard():
     if request.method == 'POST' and len(request.form) == 1: # check if message or clear
         if load_credits.amount > 0: # check if user has enough credits
             prompt = request.form.get('prompt')
-            response = get_response(user.conversation_context, prompt)
+            response = get_response(user.messages, prompt)
             user.messages.append({"role": "assistant", "content": response})
-            user.conversation_context.append({"prompt":prompt, "response":response}) # add question and response to context
             print("test1")
-            print(user.conversation_context)
             print(user.messages)
         else:
             flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
     elif request.method == 'POST' and len(request.form) > 1: # when clear conversation button is clicked
         user.messages = []
-        user.conversation_context = []
 
     print("test2")
-    print(user.conversation_context)
     print(user.messages)
     db.session.commit()
     print("test3")
-    print(user.conversation_context)
     print(user.messages)
 
     return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
