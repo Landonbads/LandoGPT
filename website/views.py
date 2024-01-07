@@ -55,11 +55,7 @@ def dashboard():
             prompt = request.form.get('prompt')
             response = get_response(user.conversation_context, prompt)
             user.messages.append({"role": "assistant", "content": response})
-            print("user messages after append in dashboard func:")
-            print(user.messages)
             user.conversation_context.append({"prompt":prompt, "response":response}) # add question and response to context
-            print("user messages after context append in dashboard func:")
-            print(user.messages)
             db.session.commit()
         else:
             flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
@@ -67,8 +63,8 @@ def dashboard():
         user.messages = []
         user.conversation_context = []
         db.session.commit()
-    
-    print("user messages before end in dashboard func:")
+
+    user = User.query.get(current_user.id) # update the user object with new commit...
     print(user.messages)
     return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
 
