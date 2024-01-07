@@ -49,20 +49,20 @@ def dashboard():
             response = get_response(user.messages, prompt)
             user.messages.append({"role": "assistant", "content": response})
             print('test1')
-            print(user.messsages)
+            print(user.messages)
             db.session.commit()
             print('test2')
-            print(user.messsages)
+            print(user.messages)
         elif action == 'clear_messages':
             print('test3')
-            print(user.messsages)
+            print(user.messages)
             user.messages = []
             db.session.commit()
         else:
             flash('Not enough credits!', 'danger')
     
     print('test4')
-    print(user.messsages)
+    print(user.messages)
     return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
 
 
