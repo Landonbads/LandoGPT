@@ -22,7 +22,6 @@ def get_response(conversation_context, prompt):
         user.messages.append({"role": "assistant", "content": prompt_and_response["response"]})
     
     user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
-    db.session.commit()
 
     response = client.chat.completions.create(
         model='gpt-4-1106-preview',
@@ -31,7 +30,6 @@ def get_response(conversation_context, prompt):
 
     token_usage = response.usage.total_tokens # total tokens used, including both prompt and response
     user_credits.amount -= (token_usage / 1000) * TOKEN_COST_PER_1K # calculate and deduct cost of prompt+response
-    db.session.commit() # commit changes to database
 
     return response.choices[0].message.content # returns content of response
 
@@ -54,32 +52,24 @@ def dashboard():
             prompt = request.form.get('prompt')
             response = get_response(user.conversation_context, prompt)
             user.messages.append({"role": "assistant", "content": response})
-            user.messages = user.messages[:]
             user.conversation_context.append({"prompt":prompt, "response":response}) # add question and response to context
-            user.conversation_context = user.conversation_context[:]
             print("test1")
-            print(user.conversation_context)
-            print(user.messages)
-            try:
-                db.session.commit()
-            except Exception as e:
-                print("EXCEPTION FOUND WITH COMMIT")
-                print(e)
-            print("test2")
             print(user.conversation_context)
             print(user.messages)
         else:
             flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
     elif request.method == 'POST' and len(request.form) > 1: # when clear conversation button is clicked
-        print("testbeta")
         user.messages = []
         user.conversation_context = []
-        db.session.commit()
 
+    print("test2")
+    print(user.conversation_context)
+    print(user.messages)
+    db.session.commit()
+    print("test3")
+    print(user.conversation_context)
+    print(user.messages)
 
-        print("test3")
-        print(user.conversation_context)
-        print(user.messages)
     return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
 
 
