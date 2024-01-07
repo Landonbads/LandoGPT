@@ -16,19 +16,13 @@ def get_response(conversation_context, prompt):
     client.api_key = current_app.config['OPEN_API_KEY'] # configure OpenAI
     
     user.messages = [] 
-    print("user messages after clear in get_response:\n")
-    print(user.messages)
 
     for prompt_and_response in conversation_context: # loop through previous questions and answers and add the context
-        print(prompt_and_response["prompt"])
         user.messages.append({"role": "user", "content": prompt_and_response["prompt"]})
         user.messages.append({"role": "assistant", "content": prompt_and_response["response"]})
     
     user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
     db.session.commit()
-
-    print("user messages after append in get_response:\n")
-    print(user.messages)
 
     response = client.chat.completions.create(
         model='gpt-4-1106-preview',
@@ -61,9 +55,11 @@ def dashboard():
             prompt = request.form.get('prompt')
             response = get_response(user.conversation_context, prompt)
             user.messages.append({"role": "assistant", "content": response})
-            print("user messages after append in dashboard func:\n")
+            print("user messages after append in dashboard func:")
             print(user.messages)
             user.conversation_context.append({"prompt":prompt, "response":response}) # add question and response to context
+            print("user messages after context append in dashboard func:")
+            print(user.messages)
             db.session.commit()
         else:
             flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
@@ -72,6 +68,8 @@ def dashboard():
         user.conversation_context = []
         db.session.commit()
     
+    print("user messages before end in dashboard func:")
+    print(user.messages)
     return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
 
 
