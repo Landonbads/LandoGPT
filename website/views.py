@@ -57,8 +57,6 @@ def dashboard():
             user.messages.append({"role": "assistant", "content": response})
             user.conversation_context.append({"prompt":prompt, "response":response}) # add question and response to context
             db.session.commit()
-            print("test1")
-            print(user.messages)
         else:
             flash('Not enough credits!', 'danger') # flash error message if user doesn't have enough credits
     elif request.method == 'POST' and len(request.form) > 1: # when clear conversation button is clicked
@@ -66,8 +64,6 @@ def dashboard():
         user.conversation_context = []
         db.session.commit()
 
-    print("test2")
-    print(user.messages)
     return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
 
 
