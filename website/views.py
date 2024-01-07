@@ -16,6 +16,8 @@ def get_response(conversation_context, prompt):
     client.api_key = current_app.config['OPEN_API_KEY'] # configure OpenAI
     
     user.messages = [] 
+    print("user messages after clear in get_response:\n")
+    print(user.messages)
 
     for prompt_and_response in conversation_context: # loop through previous questions and answers and add the context
         print(prompt_and_response["prompt"])
@@ -25,10 +27,14 @@ def get_response(conversation_context, prompt):
     user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
     db.session.commit()
 
+    print("user messages after append in get_response:\n")
+    print(user.messages)
+
     response = client.chat.completions.create(
         model='gpt-4-1106-preview',
         messages=user.messages,
     )
+
     token_usage = response.usage.total_tokens # total tokens used, including both prompt and response
     user_credits.amount -= (token_usage / 1000) * TOKEN_COST_PER_1K # calculate and deduct cost of prompt+response
     db.session.commit() # commit changes to database
@@ -55,6 +61,8 @@ def dashboard():
             prompt = request.form.get('prompt')
             response = get_response(user.conversation_context, prompt)
             user.messages.append({"role": "assistant", "content": response})
+            print("user messages after append in dashboard func:\n")
+            print(user.messages)
             user.conversation_context.append({"prompt":prompt, "response":response}) # add question and response to context
             db.session.commit()
         else:
