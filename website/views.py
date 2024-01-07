@@ -43,7 +43,6 @@ def home():
     else: # if user is authenticated redirect to user dashboard
         return redirect(url_for('views.dashboard')) 
 
-
 # dashboard route for logged in users
 @views.route('/dashboard',methods=['GET','POST'])
 @login_required
