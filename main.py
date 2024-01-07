@@ -2,8 +2,9 @@
 from website import create_app
 from website import create_database
 
-app = create_app()
-
 # limits running to only this file
 if __name__ == '__main__':
+    app = create_app()
+    create_database(app)
     app.run(debug=True)
+    
