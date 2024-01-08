@@ -1,4 +1,5 @@
 # LandoGPT
+https://www.landogpt.xyz/
 
 ## What is this project? 
 A website that emulates chatgpt, but goes on a per-request basis instead of the monthly subscription for GPT-4. Communicates with the OpenAI API with version GPT-4 Turbo (gpt-4-1106-preview).
