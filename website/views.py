@@ -48,11 +48,7 @@ def dashboard():
         if action == 'send_message' and load_credits.amount > 0:
             prompt = request.form.get('prompt')
             response = get_response(messages, prompt,user,load_credits)
-<<<<<<< HEAD
             messages = messages + [{"role": "assistant", "content": response}] # this line right here was IT
-=======
-            messages.append({"role": "assistant", "content": response})
->>>>>>> de577e29cd10095a0b7587deb81978107423575a
         elif action == 'clear_messages':
             messages = []
         else:
