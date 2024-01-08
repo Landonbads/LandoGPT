@@ -9,17 +9,16 @@ views = Blueprint('views',__name__)
 
 client = OpenAI()
 
-def get_response(conversation_context, prompt):
-    user = User.query.get(current_user.id) # fetch current user
-    user_credits = Credits.query.filter_by(user_id=current_user.id).first() # fetch user credits
+def get_response(user_messages,prompt,user,user_credits):
     TOKEN_COST_PER_1K = .06
+    messages = user_messages
     client.api_key = current_app.config['OPEN_API_KEY'] # configure OpenAI
         
-    user.messages.append({"role": "user", "content": prompt}) # append new prompt/question
+    messages.append({"role": "user", "content": prompt}) # append new prompt/question
 
     response = client.chat.completions.create(
         model='gpt-4-1106-preview',
-        messages=user.messages,
+        messages=messages,
     )
 
     token_usage = response.usage.total_tokens # total tokens used, including both prompt and response
@@ -39,31 +38,26 @@ def home():
 @views.route('/dashboard',methods=['GET','POST'])
 @login_required
 def dashboard():
-    user = User.query.get(current_user.id) # fetch current user
+    user = User.query.filter_by(id=current_user.id).first()
+    messages = user.messages
+
     load_credits = Credits.query.filter_by(user_id=current_user.id).first() # load credits from user
 
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'send_message' and load_credits.amount > 0:
             prompt = request.form.get('prompt')
-            response = get_response(user.messages, prompt)
-            user.messages.append({"role": "assistant", "content": response})
-            print('test1')
-            print(user.messages)
-            db.session.commit()
-            print('test2')
-            print(user.messages)
+            response = get_response(messages, prompt,user,load_credits)
+            messages = messages + [{"role": "assistant", "content": response}] # this line right here was IT
         elif action == 'clear_messages':
-            print('test3')
-            print(user.messages)
-            user.messages = []
-            db.session.commit()
+            messages = []
         else:
             flash('Not enough credits!', 'danger')
-    
-    print('test4')
-    print(user.messages)
-    return render_template("dashboard.html",messages=user.messages,credits=load_credits.amount)
+
+    user.messages = messages
+    db.session.commit()
+
+    return render_template("dashboard.html",messages=messages,credits=load_credits.amount)
 
 
 @views.route('/stripe_pay')
