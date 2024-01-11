@@ -9,7 +9,7 @@ views = Blueprint('views',__name__)
 
 client = OpenAI()
 
-def get_response(user_messages,prompt,user,user_credits):
+def get_response(user_messages,prompt,user_credits):
     TOKEN_COST_PER_1K = .06
     messages = user_messages
     client.api_key = current_app.config['OPEN_API_KEY'] # configure OpenAI
@@ -47,7 +47,7 @@ def dashboard():
         action = request.form.get('action')
         if action == 'send_message' and load_credits.amount > 0:
             prompt = request.form.get('prompt')
-            response = get_response(messages, prompt,user,load_credits)
+            response = get_response(messages, prompt,load_credits)
             messages = messages + [{"role": "assistant", "content": response}] # this line right here was IT
         elif action == 'clear_messages':
             messages = []
